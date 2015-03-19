@@ -1,12 +1,11 @@
-# jcondor
+# jCondor
 A graphical front-end for HTCondor 
 
-jCondor is a GUI to manage HTCondor jobs.
-(http://research.cs.wisc.edu/htcondor/)
-Condor was a  monitoring tool for ATLAS clusters running HTCondor.
+jCondor was used as a GUI for monitoring clusters running 
+HTCondor (http://research.cs.wisc.edu/htcondor/).
 It is designed to display information on the HTCondor job submissions using a web browser 
 (jobs, users, CPU load). The program is written in Java and can be used as an applet. 
-The program was developed to monitor  job resources and query job status. 
+The program was developed to monitor  job resources,  query job status and users. 
 
 <h1>How to use</h1>
 
