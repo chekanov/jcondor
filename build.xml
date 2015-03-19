@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="jcondor" default="build-dist">
+	<description>jCondor build script</description>
+
+	<property name="app.name" value="jcondor" />
+	<property name="app.version" value="0.2.0" />
+	<property name="bin.dir" value="bin" />
+	<property name="dist.dir" value="dist" />
+	<property name="docs.dir" value="doc" />
+        <property name="lib.dir"     value="lib"/>
+	<property name="src.dir" value="src" />
+	<property name="proguard.path" value="lib/proguard.jar" />
+	<property name="junit.path" value="lib/junit.jar" />
+	<import file="build-local.xml" optional="true" />
+
+
+ <path id="classpath">
+       <fileset dir="${lib.dir}" includes="**/*.jar"/>
+  </path>
+
+
+
+
+	<target name="build-dist" depends="-init-bin">
+               <delete dir="${dist.dir}" />
+               <mkdir dir="${dist.dir}" />
+
+		<jar destfile="${dist.dir}/${app.name}-wsapplet-fat.jar"
+		     basedir="${bin.dir}"
+		     index="true"
+		     includes="**/jcondor/*.class **/jcondor/*.html **/vlsolutions/** **/images/*.png **/html/**"
+		     excludes=""
+		     manifestencoding="UTF-8">
+		</jar>
+
+		<jar destfile="${dist.dir}/${app.name}.jar"
+		     basedir="${bin.dir}"
+		     index="true"
+		     excludes=""
+		     manifestencoding="UTF-8">
+			<manifest>
+				<attribute name="Main-Class" value="jcondor.Main" />
+			</manifest>
+		</jar>
+		<move file="${dist.dir}/${app.name}.jar"
+		      tofile="${dist.dir}/${app.name}-fat.jar" />
+		<delete dir="${bin.dir}" />
+
+		<taskdef name="proguard"
+		         classname="proguard.ant.ProGuardTask"
+		         classpathref="classpath" />
+
+
+		<proguard allowaccessmodification="true"
+		          obfuscate="true"
+		          obfuscationdictionary="compact.txt"
+		          optimizationpasses="1"
+		          optimize="false"
+		          overloadaggressively="true"
+		          repackageclasses=""
+		          shrink="true"
+		          skipnonpubliclibraryclasses="false"
+		          skipnonpubliclibraryclassmembers="false"
+		          target="1.7">
+			<injar path="${dist.dir}/${app.name}-fat.jar" />
+			<outjar path="${app.name}.jar" />
+			<libraryjar path="${java.home}/lib/rt.jar" />
+			<keepclasseswithmembers access="public" type="class">
+				<method access="public static"
+				        type="void"
+				        name="main"
+				        parameters="java.lang.String[]" />
+			</keepclasseswithmembers>
+			<keep allowoptimization="true"
+			      type="class"
+			      implements="jcondor.Main" />
+			<keep type="class" implements="jcondor.Main" />
+			<keepclassmembers type="class" extends="java.lang.Enum">
+				<method access="public static"
+				        type="**[]"
+				        name="values"
+				        parameters="" />
+				<method access="public static"
+				        type="**"
+				        name="valueOf"
+				        parameters="java.lang.String" />
+			</keepclassmembers>
+			<keepclassmembers type="class" extends="java.io.Serializable">
+				<field access="static final"
+				       type="long"
+				       name="serialVersionUID" />
+				<field access="!static !transient" />
+			</keepclassmembers>
+			<keep access="public" type="class" />
+		</proguard>
+                 <delete file="${dist.dir}/${app.name}-fat.jar" />
+
+	</target>
+
+	<target name="clean">
+		<delete dir="${bin.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${docs.dir}" />
+	</target>
+
+	<target name="-init-bin">
+		<delete dir="${bin.dir}" />
+		<mkdir dir="${bin.dir}" />
+
+		<copy todir="${bin.dir}">
+			<fileset dir="${src.dir}"
+			         includes="**/*.gif **/*.html **/*.jpg **/*.opn **/*.png **/*.properties **/*.wav" />
+		</copy>
+
+		<javac srcdir="${src.dir}"
+		       destdir="${bin.dir}"
+		       source="1.7"
+		       target="1.7"
+		       debug="off"
+		       optimize="on"
+		       deprecation="on"
+		       classpathref="classpath" 
+		       encoding="UTF-8" />
+	</target>
+
+	<target name="-init-docs">
+		<delete dir="${docs.dir}" />
+		<mkdir dir="${docs.dir}" />
+		<javadoc access="package"
+		         author="true"
+		         charset="UTF-8"
+		         classpathref="classpath" 
+		         destdir="${docs.dir}"
+		         docencoding="UTF-8"
+		         doctitle="${app.name} API"
+		         encoding="UTF-8"
+		         nodeprecated="false"
+		         nodeprecatedlist="false"
+		         noindex="false"
+		         nonavbar="false"
+		         notree="false"
+		         packagenames="jcondor"
+		         source="1.7"
+		         sourcepath="${src.dir}"
+		         splitindex="true"
+		         use="true"
+		         version="true" />
+	</target>
+
+	<target name="-sign-jar" if="keystore.password">
+		<move file="${dist.dir}/${app.name}.jar"
+		      tofile="${dist.dir}/${app.name}-unsigned.jar" />
+		<signjar jar="${dist.dir}/${app.name}-unsigned.jar"
+		         signedjar="${dist.dir}/${app.name}.jar"
+		         alias="jChecs"
+		         storepass="${keystore.password}" />
+		<delete file="${dist.dir}/${app.name}-unsigned.jar" />
+	</target>
+</project>
